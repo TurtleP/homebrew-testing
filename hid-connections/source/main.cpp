@@ -88,7 +88,7 @@ Joystick* addJoystick(size_t index)
             break;
         }
     }
-
+    LOG("#%zu Reused? %d", index, reused);
     if (!joystick)
     {
         joystick = new Joystick(g_Joysticks.size());

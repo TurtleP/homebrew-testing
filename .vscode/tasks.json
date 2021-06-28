@@ -2,20 +2,8 @@
     // See https://go.microsoft.com/fwlink/?LinkId=733558
     // for the documentation about the tasks.json format
     "version": "2.0.0",
-    "tasks": [
-        {
-            "label": "3DS Transfer",
-            "type": "shell",
-            "command": "3dslink *.3dsx"
-        },
-
-        {
-            "label": "Switch Transfer",
-            "type": "shell",
-            "command": "nxlink -a 192.168.50.245 ${fileWorkspaceFolder}/*.nro",
-            "group": "build"
-        },
-
+    "tasks":
+    [
         {
             "label": "Clean",
             "type": "shell",
