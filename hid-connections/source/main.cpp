@@ -245,6 +245,11 @@ int main(int argc, char** argv)
                 {
                     playerOne->Merge(g_ActiveJoysticks.at(1));
                     playerOne->Open(0);
+
+                    /*
+                    ** We merged the two controllers, so remove
+                    ** the right joycon from list
+                    */
                     g_Joysticks.remove(g_ActiveJoysticks.at(1));
                 }
                 else
