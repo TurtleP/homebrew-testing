@@ -3,9 +3,18 @@
 #include "log.h"
 
 static constexpr HidNpadStyleTag INVALID_STYLE_TAG = static_cast<HidNpadStyleTag>(-1);
+static constexpr const char* GUID_FORMAT           = "%s-%x-%zu";
 
-Joystick::Joystick(size_t index) : index(index)
+Joystick::Joystick(size_t index) : index(index), fakeHandle(nullptr)
 {}
+
+void Joystick::Close()
+{
+    if (this->fakeHandle != nullptr)
+        free(this->fakeHandle);
+
+    this->fakeHandle = nullptr;
+}
 
 HidNpadIdType Joystick::Split()
 {
@@ -39,6 +48,8 @@ bool Joystick::Merge(const Joystick* other)
 
 bool Joystick::Open(size_t index)
 {
+    this->Close();
+
     if (index == 0)
         padInitializeDefault(&this->state);
     else
@@ -72,12 +83,16 @@ bool Joystick::Open(size_t index)
             return false;
     }
 
+    this->fakeHandle = malloc(1);
+    this->guid       = guids[this->styleTag];
+
     return padIsConnected(&this->state);
 }
 
 HidNpadStyleTag Joystick::GetStyleTag() const
 {
     uint32_t styleSet = padGetStyleSet(&this->state);
+
     LOG("padStyleSet %x", styleSet);
 
     if (styleSet & HidNpadStyleTag_NpadFullKey)

@@ -1,6 +1,10 @@
 #pragma once
 
+#include <memory>
 #include <string>
+
+#include "guid.h"
+
 #include <switch.h>
 
 class Joystick
@@ -10,6 +14,13 @@ class Joystick
     {}
 
     Joystick(size_t index);
+
+    ~Joystick()
+    {
+        this->Close();
+    };
+
+    void Close();
 
     bool Open(size_t index);
 
@@ -41,10 +52,24 @@ class Joystick
         return static_cast<HidNpadIdType>(HidNpadIdType_No1 + this->index);
     }
 
+    std::string GetGUID() const
+    {
+        return this->guid;
+    }
+
+    void* GetHandle() const
+    {
+        return this->fakeHandle;
+    }
+
   private:
     size_t index;
+
     PadState state;
     HidNpadStyleTag styleTag;
 
+    void* fakeHandle;
+
     std::string name;
+    std::string guid;
 };

@@ -36,6 +36,28 @@ size_t getActiveControllerCount()
     return active;
 }
 
+std::string getJoystickGUID(size_t index)
+{
+    if (index < 0 || index >= getActiveControllerCount())
+        return std::string("");
+
+    HidNpadIdType joystick = static_cast<HidNpadIdType>(HidNpadIdType_No1 + index);
+    uint32_t styleSet      = hidGetNpadStyleSet(joystick);
+
+    if (styleSet & HidNpadStyleTag_NpadFullKey)
+        return guids[HidNpadStyleTag_NpadFullKey];
+    else if (styleSet & HidNpadStyleTag_NpadHandheld)
+        return guids[HidNpadStyleTag_NpadHandheld];
+    else if (styleSet & HidNpadStyleTag_NpadJoyDual)
+        return guids[HidNpadStyleTag_NpadJoyDual];
+    else if (styleSet & HidNpadStyleTag_NpadJoyLeft)
+        return guids[HidNpadStyleTag_NpadJoyLeft];
+    else if (styleSet & HidNpadStyleTag_NpadJoyRight)
+        return guids[HidNpadStyleTag_NpadJoyRight];
+
+    return std::string("");
+}
+
 /*
 ** Get a Joystick by index
 ** @param size_t index to check
@@ -45,11 +67,20 @@ Joystick* getJoystickByIndex(size_t index)
 {
     for (auto stick : g_ActiveJoysticks)
     {
+        LOG("Stick #%zu / Index #%zu", stick->GetID(), index);
         if (stick->GetID() == index)
             return stick;
     }
 
     return nullptr;
+}
+
+Joystick* getJoystick(size_t index)
+{
+    if (index < 0 || index > g_ActiveJoysticks.size())
+        return nullptr;
+
+    return g_ActiveJoysticks[index];
 }
 
 /*
@@ -76,12 +107,13 @@ Joystick* addJoystick(size_t index)
     if (index < 0 || index >= g_activeCount)
         return nullptr;
 
+    std::string guid   = getJoystickGUID(index);
     Joystick* joystick = nullptr;
     bool reused        = false;
 
     for (auto stick : g_Joysticks)
     {
-        if (!stick->IsConnected())
+        if (!stick->IsConnected() && stick->GetGUID() == guid)
         {
             joystick = stick;
             reused   = true;
@@ -100,14 +132,16 @@ Joystick* addJoystick(size_t index)
     if (!joystick->Open(index))
         return nullptr;
 
-    for (auto stick : g_ActiveJoysticks)
+    for (auto activeStick : g_ActiveJoysticks)
     {
-        if (joystick == stick)
+        if (joystick->GetHandle() == activeStick->GetHandle())
         {
+            joystick->Close();
+
             if (!reused)
                 g_Joysticks.remove(joystick);
 
-            return stick;
+            return activeStick;
         }
     }
 
@@ -151,7 +185,7 @@ int checkJoystickRemoved()
     return -1;
 }
 
-static constexpr const char* format = "[%s] Player %d : Active %d\x1b[K\n";
+static constexpr const char* format = "[%s] Player %d : Active %d\n";
 
 int main(int argc, char** argv)
 {
@@ -172,9 +206,14 @@ int main(int argc, char** argv)
     {
         consoleClear();
 
-        printf("Checking for Controllers.. Plus to Quit\nActive %zu / Current %zu\n",
+        printf("Checking for Controllers.. Plus to Quit\nActive %zu / Current %zu\n\n",
                getActiveControllerCount(), g_activeCount);
 
+        printf("[Cached Joysticks]\n");
+        for (auto joystick : g_Joysticks)
+            printf(format, joystick->GetName().c_str(), joystick->GetID(), joystick->IsConnected());
+        printf("\n");
+        printf("[Active Joysticks]\n");
         for (auto joystick : g_ActiveJoysticks)
             printf(format, joystick->GetName().c_str(), joystick->GetID(), joystick->IsConnected());
 
@@ -206,6 +245,7 @@ int main(int argc, char** argv)
                 {
                     playerOne->Merge(g_ActiveJoysticks.at(1));
                     playerOne->Open(0);
+                    g_Joysticks.remove(g_ActiveJoysticks.at(1));
                 }
                 else
                     printf("Failure to merge!\n");
