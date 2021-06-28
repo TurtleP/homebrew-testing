@@ -107,7 +107,8 @@ Joystick* addJoystick(size_t index)
     if (index < 0 || index >= g_activeCount)
         return nullptr;
 
-    std::string guid   = getJoystickGUID(index);
+    std::string guid = getJoystickGUID(index);
+
     Joystick* joystick = nullptr;
     bool reused        = false;
 
@@ -120,7 +121,7 @@ Joystick* addJoystick(size_t index)
             break;
         }
     }
-    LOG("#%zu Reused? %d", index, reused);
+
     if (!joystick)
     {
         joystick = new Joystick(g_Joysticks.size());
@@ -179,6 +180,10 @@ int checkJoystickRemoved()
     if (active < g_activeCount)
     {
         g_activeCount = active;
+
+        for (auto joystick : g_Joysticks)
+            joystick->Update();
+
         return active;
     }
 
@@ -206,8 +211,8 @@ int main(int argc, char** argv)
     {
         consoleClear();
 
-        printf("Checking for Controllers.. Plus to Quit\nActive %zu / Current %zu\n\n",
-               getActiveControllerCount(), g_activeCount);
+        printf("Checking for Controllers.. Plus to Quit\n");
+        printf("Active %zu / Current %zu\n\n", getActiveControllerCount(), g_activeCount);
 
         printf("[Cached Joysticks]\n");
         for (auto joystick : g_Joysticks)
@@ -243,14 +248,9 @@ int main(int argc, char** argv)
             {
                 if (g_ActiveJoysticks.at(1))
                 {
+                    g_Joysticks.remove(g_ActiveJoysticks.at(1));
                     playerOne->Merge(g_ActiveJoysticks.at(1));
                     playerOne->Open(0);
-
-                    /*
-                    ** We merged the two controllers, so remove
-                    ** the right joycon from list
-                    */
-                    g_Joysticks.remove(g_ActiveJoysticks.at(1));
                 }
                 else
                     printf("Failure to merge!\n");
