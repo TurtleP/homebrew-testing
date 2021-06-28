@@ -17,6 +17,8 @@ static size_t g_activeCount        = 0;
 static std::list<Joystick*> g_Joysticks;
 static std::vector<Joystick*> g_ActiveJoysticks;
 
+std::unordered_map<size_t, HidNpadIdType> instanceID;
+
 /*
 ** Get the active HidNpadId count
 ** @return size_t active players
@@ -30,7 +32,7 @@ size_t getActiveControllerCount()
         uint32_t styleSet       = hidGetNpadStyleSet(gamepadId);
 
         if (styleSet != 0)
-            active++;
+            instanceID[active++] = gamepadId;
     }
 
     return active;
@@ -41,7 +43,7 @@ std::string getJoystickGUID(size_t index)
     if (index < 0 || index >= getActiveControllerCount())
         return std::string("");
 
-    HidNpadIdType joystick = static_cast<HidNpadIdType>(HidNpadIdType_No1 + index);
+    HidNpadIdType joystick = getJoystickInstanceID(index);
     uint32_t styleSet      = hidGetNpadStyleSet(joystick);
 
     if (styleSet & HidNpadStyleTag_NpadFullKey)
@@ -67,7 +69,6 @@ Joystick* getJoystickByIndex(size_t index)
 {
     for (auto stick : g_ActiveJoysticks)
     {
-        LOG("Stick #%zu / Index #%zu", stick->GetID(), index);
         if (stick->GetID() == index)
             return stick;
     }
@@ -242,18 +243,20 @@ int main(int argc, char** argv)
             else if (playerOne->IsDown(HidNpadButton_Left))
             {
                 playerOne->Split();
-                playerOne->Open(0);
+                for (size_t index = 0; index < g_ActiveJoysticks.size(); index++)
+                    g_ActiveJoysticks[index]->Open(index);
             }
             else if (playerOne->IsDown(HidNpadButton_Right))
             {
-                if (g_ActiveJoysticks.at(1))
+                if (getJoystickByIndex(1))
                 {
-                    g_Joysticks.remove(g_ActiveJoysticks.at(1));
-                    playerOne->Merge(g_ActiveJoysticks.at(1));
-                    playerOne->Open(0);
+                    if (playerOne->Merge(g_ActiveJoysticks.at(1)))
+                    {
+                        g_Joysticks.remove(g_ActiveJoysticks.at(1));
+                        for (size_t index = 0; index < g_ActiveJoysticks.size(); index++)
+                            g_ActiveJoysticks[index]->Open(index);
+                    }
                 }
-                else
-                    printf("Failure to merge!\n");
             }
         }
 

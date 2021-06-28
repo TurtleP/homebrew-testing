@@ -49,7 +49,7 @@ class Joystick
 
     HidNpadIdType GetID() const
     {
-        return static_cast<HidNpadIdType>(HidNpadIdType_No1 + this->index);
+        return this->instanceID;
     }
 
     std::string GetGUID() const
@@ -67,6 +67,8 @@ class Joystick
 
     PadState state;
     HidNpadStyleTag styleTag;
+
+    HidNpadIdType instanceID;
 
     void* fakeHandle;
 

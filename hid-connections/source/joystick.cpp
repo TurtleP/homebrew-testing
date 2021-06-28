@@ -50,10 +50,12 @@ bool Joystick::Open(size_t index)
 {
     this->Close();
 
+    this->instanceID = getJoystickInstanceID(this->index);
+
     if (index == 0)
         padInitializeDefault(&this->state);
     else
-        padInitialize(&this->state, this->GetID());
+        padInitialize(&this->state, this->instanceID);
 
     padUpdate(&this->state);
 

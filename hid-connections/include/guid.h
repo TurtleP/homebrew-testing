@@ -14,3 +14,10 @@ static std::unordered_map<HidNpadStyleTag, std::string> guids = {
     { HidNpadStyleTag_NpadJoyLeft, "{4514F958-E51B-4A98-8D8A-6B0CD8C183C5}" },
     { HidNpadStyleTag_NpadJoyRight, "{93C18D7D-32AC-4718-B0B8-65F50C5ED979}" }
 };
+
+extern std::unordered_map<size_t, HidNpadIdType> instanceID;
+
+static HidNpadIdType getJoystickInstanceID(size_t index)
+{
+    return instanceID[index];
+}
