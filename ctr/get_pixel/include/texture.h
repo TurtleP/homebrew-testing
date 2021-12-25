@@ -1,6 +1,8 @@
 #pragma once
 
+#include "color.h"
 #include "quad.h"
+
 #include <3ds.h>
 
 struct Texture
@@ -51,6 +53,15 @@ struct Texture
     {
         uint16_t _width = this->image.tex->width;
         uint index      = coordToIndex(_width, x + 1, y + 1);
+
         return ((u32*)this->image.tex->data)[index];
+    }
+
+    void setPixel(uint x, uint y, float r, float g, float b, float a)
+    {
+        uint16_t _width = this->image.tex->width;
+        uint index      = coordToIndex(_width, x + 1, y + 1);
+
+        ((u32*)this->image.tex->data)[index] = setPixelColors(r, g, b, a);
     }
 };

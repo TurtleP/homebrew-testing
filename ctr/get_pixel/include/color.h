@@ -1,5 +1,6 @@
 #pragma once
 
+#include <citro2d.h>
 #include <stdio.h>
 
 struct Color
@@ -24,25 +25,30 @@ struct Color
     const char* colorName()
     {
         if (*this == Color(1.0f, 0.0f, 0.0f, 1.0f))
-            return "Red";
+            return "R";
         else if (*this == Color(0.0f, 1.0f, 0.0f, 1.0f))
-            return "Green";
+            return "G";
         else if (*this == Color(0.0f, 0.0f, 1.0f, 1.0f))
-            return "Blue";
+            return "B";
         else if (*this == Color(1.0f, 1.0f, 1.0f, 1.0f))
-            return "White";
+            return "W";
         else if (*this == Color(0.0f, 0.0f, 0.0f, 1.0f))
-            return "Black";
+            return "K";
         else if (*this == Color(0.0f, 0.0f, 0.0f, 0.0f))
-            return "Transparent";
+            return "T";
         else
-            return "Unknown";
+            return "U";
     }
 };
 
 float colorFromBytes(unsigned color)
 {
     return color / 255.0f;
+}
+
+const unsigned setPixelColors(float r, float g, float b, float a)
+{
+    return C2D_Color32f(r, g, b, a);
 }
 
 const Color getPixelColors(unsigned colors)

@@ -36,10 +36,10 @@ BUILD		:=	build
 SOURCES		:=	source
 DATA		:=	data
 INCLUDES	:=	include
-GRAPHICS	:=	gfx
+GRAPHICS	:=	graphics
 GFXBUILD	:=	$(BUILD)
 ROMFS		:=	romfs
-#GFXBUILD	:=	$(ROMFS)/gfx
+GFXBUILD	:=	$(ROMFS)/graphics
 
 #---------------------------------------------------------------------------------
 # options for code generation

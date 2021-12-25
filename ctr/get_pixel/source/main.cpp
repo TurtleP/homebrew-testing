@@ -79,7 +79,7 @@ int main(int argc, char** argv)
 
     const Color clearColor;
 
-    Texture texture("romfs:/texture.t3x");
+    Texture texture("romfs:/graphics/texture.t3x");
     Quad quad(Viewport { 0, 0, 32, 32 }, 32, 32);
 
     FILE* file = fopen("colors.txt", "w");
@@ -91,15 +91,20 @@ int main(int argc, char** argv)
             uint pixelColor = texture.getPixel(x, y);
             Color gotColor  = getPixelColors(pixelColor);
 
-            char buffer[256];
-            sprintf(buffer, "Color at %u, %u: %s ({%.2f, %.2f, %.2f, %.2f})\n", x, y,
-                    gotColor.colorName(), gotColor.r, gotColor.g, gotColor.b, gotColor.a);
-
+            char buffer[2];
+            sprintf(buffer, "%s", gotColor.colorName());
             fwrite(buffer, 1, strlen(buffer), file);
         }
+        fwrite("\n", 1, strlen("\n"), file);
     }
 
     fclose(file);
+
+    for (uint y = 0; y < texture.height() / 2; y++)
+    {
+        for (uint x = 0; x < texture.width() / 2; x++)
+            texture.setPixel(x, y, 1, 1, 1, 1);
+    }
 
     // Main loop
     while (aptMainLoop())
